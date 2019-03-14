@@ -48,6 +48,18 @@ public class KFloat implements KBClass {
 	}	
 	
 	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KFloat clone=new KFloat (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
+	}		
+	
+	/**
 	 * @param aName
 	 */
 	public void setName(String aName) {

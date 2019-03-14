@@ -45,7 +45,19 @@ public class KInteger implements KBClass {
 		
 		setName (aName);
 		setValue (tempDouble);
-	}		
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KInteger clone=new KInteger (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
+	}	
 	
 	/**
 	 * @param aName

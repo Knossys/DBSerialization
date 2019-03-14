@@ -1,5 +1,7 @@
 package com.knossys.rnd.data;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -297,10 +299,25 @@ public class KDBTable {
 			M_log.info("result: " + e.getMessage());
 		} finally {
 			driver.closeStatement(statement, resultSet);
-		}		
-		
-		//modify();
+		}
 	}	
+	
+	/**
+	 * @return
+	 */
+	public int getSelectedCount () {
+		int count=0;
+		
+		for (int i=0;i<entries.size();i++) {
+			KBClass anEntry=entries.get(i);
+			
+			if (anEntry.isSelected()==true) {
+				count++;
+			}			
+		}	
+		
+		return (count);
+	}
 	
 	/**
 	 * 
@@ -416,6 +433,59 @@ public class KDBTable {
 	}
 	
 	/**
+	 * @param k
+	 */
+	public ArrayList<KBClass> getInstances() {		
+		M_log.info("getInstances ()");
+		
+		if (driver==null) {
+			return (null);
+		}
+				
+		StringBuffer selectFormatter=new StringBuffer ();
+		
+		int index=0;
+		
+		for (int i=0;i<entries.size();i++) {
+			KBClass anEntry=entries.get(i);
+			
+			if (anEntry.isSelected()==true) {
+				if (index>0) {
+					selectFormatter.append(", ");
+				}
+				
+				selectFormatter.append(anEntry.getName());
+				
+				index++;
+			}			
+		}		
+
+		StringBuffer formatter=new StringBuffer ();
+		
+		index=0;
+		
+		for (int i=0;i<entries.size();i++) {
+			KBClass anEntry=entries.get(i);
+			
+			if (anEntry.getPrimaryKey()==true) {
+				if (index>0) {
+					formatter.append(", ");
+				}
+				
+				formatter.append(anEntry.getName()+ "='"+anEntry.getValue().toString()+"'");
+				
+				index++;
+			}			
+		}
+		
+		String statementString = "SELECT "+selectFormatter+" FROM " + tableName + " WHERE " + formatter.toString() + ";";
+		
+		M_log.info("Query: " + statementString);
+		
+    return (executeStatementGetAll (statementString));
+	}	
+	
+	/**
 	 * 
 	 * @return
 	 */
@@ -427,7 +497,7 @@ public class KDBTable {
     Statement statement = driver.createStatement();
 
     if (statement == null) {
-    	M_log.info("Stament is null, can't execute");
+    	M_log.info("Statement is null, can't execute");
       return (false);
     }
     
@@ -463,6 +533,62 @@ public class KDBTable {
 	}
 	
 	/**
+	 * 
+	 * @return
+	 */
+	protected ArrayList<KBClass> executeStatementGetAll (String statementString) {
+	  M_log.info("executeStatementGetAll (" + statementString + ")");
+	  
+	  ArrayList<KBClass> results=new ArrayList<KBClass> ();
+	  
+    ResultSet resultSet = null;
+    
+    Statement statement = driver.createStatement();
+
+    if (statement == null) {
+    	M_log.info("Statement is null, can't execute");
+      return (results);
+    }
+    
+    resultSet = driver.executeQuery(statement,statementString);
+    
+    if (resultSet==null) {
+    	return(results);
+    }
+      
+    int index=0;
+    int selectedCount=this.getSelectedCount();
+    
+    if (resultSet!=null) {
+    	M_log.info("We have results, extracting ...");
+      try {
+        index=0;
+        while (resultSet.next()) {
+          KBClass anEntry=entries.get(index);
+          if (anEntry.isSelected()==true) {
+          	KBClass clone=anEntry.copy();
+          	clone.extract (resultSet);
+          	results.add(clone);
+            index++;
+            
+            if (index>(selectedCount-1)) {
+            	index=0;
+            }
+          }
+        }
+      } catch (Exception e) {
+        M_log.info("DB Exception: " + e.getMessage());
+        driver.closeStatement(statement, resultSet);
+        return (results);
+      } finally {
+        driver.closeStatement(statement, resultSet);
+      }
+    } 
+    
+    return(results);	  
+	}	
+	
+	/**
 	 * @return
 	 */
 	public JsonObject toJSON () {
@@ -491,4 +617,70 @@ public class KDBTable {
 		
 		return ("{}");
 	}
+	
+	/**
+	 * 
+	 */
+	public void toCSV (String aFile, ArrayList<KBClass> values) {
+  	M_log.info("toCSV ("+aFile+")");
+  	toSpreadSheet (aFile,"\t",values);	
+	}
+	
+	/**
+	 * 
+	 */
+	public void toTSV (String aFile, ArrayList<KBClass> values) {
+  	M_log.info("toTSV ("+aFile+")");
+  	toSpreadSheet (aFile,"\t",values);
+	}	
+	
+	/**
+	 * 
+	 */
+	public void toSpreadSheet (String aFile, String aSeparator, ArrayList<KBClass> values) {
+  	M_log.info("toSpreadSheet ("+aFile+")");
+
+    FileWriter writer=null;
+    
+		try {
+			writer = new FileWriter(aFile, true);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		int rowSize=getSelectedCount ();
+		int index=0;
+		
+		try {
+			for (int i=0;i<values.size();i++) {
+				KBClass entry=values.get(i);
+				
+				if (index!=0) {
+					writer.write (aSeparator);
+				}
+				
+				writer.write(""+entry.getValue());
+				
+				index++;
+				
+				if (index>(rowSize-1)) {
+					writer.write("\n");
+					index=0;
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;			
+		}
+		
+    try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+	}		
 }

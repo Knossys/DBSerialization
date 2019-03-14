@@ -11,6 +11,15 @@ import java.sql.ResultSet;
  * @author vvelsen
  */
 public interface KBClass {
+
+	/**
+	 * Copy constructor, probably one of the most important methods of the lot.
+	 * Is used to rapidly instantiate many instances from an already configured
+	 * and existing instance. So you can use it to create a new fresh copy or
+	 * clone an existing one.
+	 * @return
+	 */
+	public KBClass copy ();
 	
 	/**
 	 * Call this if you want this object to be included when doing a retrieval

@@ -22,6 +22,18 @@ public class KDouble implements KBClass {
 	}
 	
 	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KDouble clone=new KDouble (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
+	}	
+	
+	/**
 	 * 
 	 */
 	public KDouble (String aName, String aValue) {

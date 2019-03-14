@@ -1,12 +1,15 @@
 package com.knossys.rnd.kshiro;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.logging.Logger;
 
 import com.knossys.rnd.data.KBTableOperations;
 import com.knossys.rnd.data.SQLiteDriver;
+import com.knossys.rnd.data.primitives.KBClass;
 import com.knossys.rnd.test.KBDBTestClassIndexed;
 import com.knossys.rnd.test.KBDBTestClassRandom;
+import com.knossys.rnd.test.KBDBTestClassRandomSmall;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -22,7 +25,10 @@ public class AppTest extends TestCase {
   private SQLiteDriver driver=new SQLiteDriver ();
   
   private KBDBTestClassRandom testClassRandom=null;
-  private KBDBTestClassIndexed testClassIndexed=null;  
+  private KBDBTestClassIndexed testClassIndexed=null; 
+  
+  private KBDBTestClassRandomSmall testClassRandomSmall1=null; 
+  private KBDBTestClassRandomSmall testClassRandomSmall2=null; 
   
   /**
    * Create the test case
@@ -127,29 +133,101 @@ public class AppTest extends TestCase {
         
     KBTableOperations tableOperations=new KBTableOperations (driver);
     
-    if (tableOperations.joinCross(testClassRandom, testClassIndexed)==false) {
+    if (tableOperations.joinCross(testClassRandom, testClassIndexed)==null) {
     	fail("Test failed, see log for details");
     }
     
-    if (tableOperations.joinInner(testClassRandom, testClassIndexed)==false) {
+    if (tableOperations.joinInner(testClassRandom, testClassIndexed)==null) {
     	fail("Test failed, see log for details");
     }
     
-    if (tableOperations.joinOutterLeft(testClassRandom, testClassIndexed)==false) {
+    if (tableOperations.joinOutterLeft(testClassRandom, testClassIndexed)==null) {
     	fail("Test failed, see log for details");
     }
     
     // RIGHT and FULL OUTER JOINs are not currently supported in SQLite
     
     /*
-    if (tableOperations.joinOutterRight(testClassRandom, testClassIndexed)==false) {
+    if (tableOperations.joinOutterRight(testClassRandom, testClassIndexed)==null) {
     	fail("Test failed, see log for details");
     }
     
-    if (tableOperations.joinOutterFull(testClassRandom, testClassIndexed)==false) {
+    if (tableOperations.joinOutterFull(testClassRandom, testClassIndexed)==null) {
     	fail("Test failed, see log for details");
     }
     */
+    
+    // Create an instance of a table/class that is small enough so that we can see what we're doing
+    testClassRandomSmall1=new KBDBTestClassRandomSmall (driver);
+    testClassRandomSmall1.setTableName ("testtablerandomsmall1");
+    
+    // Allow the table class to configure its table schema    
+    try {
+      testClassRandomSmall1.prepTables ();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return;
+    }    
+    
+    // Generate 10 random instances
+    for (long t=0;t<10;t++) {
+      testClassRandomSmall1.makeChanges(t);
+    }
+    
+    // Create an instance of a table/class that is small enough so that we can see what we're doing
+    testClassRandomSmall2=new KBDBTestClassRandomSmall (driver);
+    testClassRandomSmall1.setTableName ("testtablerandomsmall1");
+    
+    // Allow the table class to configure its table schema    
+    try {
+      testClassRandomSmall2.prepTables ();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return;
+    }     
+    
+    // Generate 10 random instances
+    for (long t=0;t<10;t++) {
+      testClassRandomSmall2.makeChanges(t);
+    }
+    
+    ArrayList<KBClass> results=null;
+    
+    results=tableOperations.joinCross(testClassRandomSmall1, testClassRandomSmall2);
+    
+    if (results==null) {
+      fail("Test failed, see log for details");
+    }
+    
+    tableOperations.toTSV("./db/table-join-cross.tsv", results);
+        
+    results=tableOperations.joinInner(testClassRandomSmall1, testClassRandomSmall2);
+    
+    if (results==null) {
+      fail("Test failed, see log for details");
+    }    
+    
+    tableOperations.toTSV("./db/table-join-inner.tsv", results);
+    
+    results=tableOperations.joinOutterLeft(testClassRandomSmall1, testClassRandomSmall2);
+    
+    if (results==null) {
+      fail("Test failed, see log for details");
+    }
+    
+    tableOperations.toTSV("./db/table-join-left.tsv", results);
+    
+    // RIGHT and FULL OUTER JOINs are not currently supported in SQLite
+    
+    /*
+    if (tableOperations.joinOutterRight(testClassRandomSmall1, testClassRandomSmall2)==null) {
+      fail("Test failed, see log for details");
+    }
+    
+    if (tableOperations.joinOutterFull(testClassRandomSmall1, testClassRandomSmall2)==null) {
+      fail("Test failed, see log for details");
+    }
+    */    
     
     assertTrue(true);
   }

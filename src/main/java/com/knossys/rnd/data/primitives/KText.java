@@ -29,6 +29,18 @@ public class KText implements KBClass {
 	}		
 	
 	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KText clone=new KText (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
+	}			
+	
+	/**
 	 * @param aName
 	 */
 	public void setName(String aName) {

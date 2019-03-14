@@ -31,6 +31,18 @@ public class KString implements KBClass {
 	}	
 	
 	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KString clone=new KString (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
+	}			
+	
+	/**
 	 * @param aName
 	 */
 	public void setName(String aName) {

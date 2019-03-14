@@ -31,6 +31,18 @@ public class KGUID implements KBClass {
 	}	
 	
 	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KGUID clone=new KGUID (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
+	}	
+	
+	/**
 	 * @param aName
 	 */
 	public void setName(String aName) {

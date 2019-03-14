@@ -52,7 +52,7 @@ public class KBTableOperations extends KDBTable {
 	 * @param right
 	 * @return
 	 */
-	public boolean joinCross (KDBTable left, KDBTable right) {
+	public ArrayList<KBClass> joinCross (KDBTable left, KDBTable right) {
     M_log.info("joinCross ()");
     
 		StringBuffer statement=new StringBuffer ();
@@ -61,7 +61,7 @@ public class KBTableOperations extends KDBTable {
 		
 		statement.append("SELECT * FROM " + left.getTableName() + " CROSS JOIN " + right.getTableName());
 		
-    return (executeStatement (statement.toString()));
+    return (executeStatementGetAll (statement.toString()));
 	}
 	
 	/**
@@ -69,7 +69,7 @@ public class KBTableOperations extends KDBTable {
 	 * @param right
 	 * @return
 	 */
-	public boolean joinInner (KDBTable left, KDBTable right) {
+	public ArrayList<KBClass> joinInner (KDBTable left, KDBTable right) {
     M_log.info("joinInner ()");
     
 		StringBuffer statement=new StringBuffer ();
@@ -81,7 +81,7 @@ public class KBTableOperations extends KDBTable {
 		
 		statement.append("SELECT * FROM " + left.getTableName() + "," + right.getTableName() + " WHERE " + left.getTableName() + "." + primaryLeft + " = " + right.getTableName() + "." + primaryRight);
 		
-    return (executeStatement (statement.toString()));
+    return (executeStatementGetAll (statement.toString()));
 	}
 
   /**
@@ -89,7 +89,7 @@ public class KBTableOperations extends KDBTable {
    * @param right
    * @return
    */
-  public boolean joinOutterLeft (KDBTable left, KDBTable right) {
+  public ArrayList<KBClass> joinOutterLeft (KDBTable left, KDBTable right) {
     M_log.info("joinOutterLeft ()");
     
     StringBuffer statement=new StringBuffer ();
@@ -101,7 +101,7 @@ public class KBTableOperations extends KDBTable {
     
     statement.append("SELECT * FROM " + left.getTableName() + " LEFT OUTER JOIN " + right.getTableName() + " ON " + left.getTableName() + "." + primaryLeft + " = " + right.getTableName() + "." + primaryRight);
     
-    return (executeStatement (statement.toString()));
+    return (executeStatementGetAll (statement.toString()));
   }
   
   /**
@@ -111,12 +111,12 @@ public class KBTableOperations extends KDBTable {
    * @param right
    * @return
    */
-  public boolean joinOutterRight (KDBTable left, KDBTable right) {
+  public ArrayList<KBClass> joinOutterRight (KDBTable left, KDBTable right) {
     M_log.info("joinOutterRight ()");
     
     if (driver.getDriverType().equalsIgnoreCase("SQLITE")==true) {
     	M_log.info("SQLITE doesn't support this operation yet");
-    	return (false);
+    	return (null);
     }
     
     StringBuffer statement=new StringBuffer ();
@@ -128,7 +128,7 @@ public class KBTableOperations extends KDBTable {
      
     statement.append("SELECT * FROM " + left.getTableName() + " RIGHT OUTER JOIN " + right.getTableName() + " ON " + left.getTableName() + "." + primaryLeft + " = " + right.getTableName() + "." + primaryRight);
     
-    return (executeStatement (statement.toString()));
+    return (executeStatementGetAll (statement.toString()));
   }  
 	
 	/**
@@ -138,12 +138,12 @@ public class KBTableOperations extends KDBTable {
    * @param right
    * @return
    */
-  public boolean joinOutterFull (KDBTable left, KDBTable right) {
+  public ArrayList<KBClass> joinOutterFull (KDBTable left, KDBTable right) {
     M_log.info("joinOutterFull ()");
     
     if (driver.getDriverType().equalsIgnoreCase("SQLITE")==true) {
     	M_log.info("SQLITE doesn't support this operation yet");
-    	return (false);
+    	return (null);
     }   
     
     StringBuffer statement=new StringBuffer ();
@@ -155,6 +155,6 @@ public class KBTableOperations extends KDBTable {
     
     statement.append("SELECT * FROM " + left.getTableName() + " FULL OUTER JOIN " + right.getTableName() + " ON " + left.getTableName() + "." + primaryLeft + " = " + right.getTableName() + "." + primaryRight);
     
-    return (executeStatement (statement.toString()));
+    return (executeStatementGetAll (statement.toString()));
   }
 }

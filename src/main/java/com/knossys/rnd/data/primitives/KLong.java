@@ -45,6 +45,18 @@ public class KLong implements KBClass {
 		
 		setName (aName);
 		setValue (tempValue);
+	}
+	
+	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KLong clone=new KLong (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
 	}		
 	
 	/**

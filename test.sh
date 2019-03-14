@@ -1,5 +1,4 @@
 #!/bin/bash
 clear
-rm -rf ./test.log
-rm -rf ./db/*.db
+./clean.sh
 mvn package

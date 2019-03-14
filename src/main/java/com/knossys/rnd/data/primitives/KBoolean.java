@@ -26,6 +26,18 @@ public class KBoolean implements KBClass {
 	}
 	
 	/**
+	 * Copy constructor
+	 */
+	public KBClass copy() {
+		KBoolean clone=new KBoolean (name);
+		clone.setIsRequired(isRequired);
+		clone.setPrimaryKey(isPrimaryKey);
+		clone.select (isSelectedInQuery);
+		clone.setValue(value);
+		return clone;
+	}
+	
+	/**
 	 * 
 	 */
 	public KBoolean (String aName, String aValue) {
