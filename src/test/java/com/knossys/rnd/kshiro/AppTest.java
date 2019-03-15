@@ -9,14 +9,15 @@ import com.knossys.rnd.data.SQLiteDriver;
 import com.knossys.rnd.data.primitives.KBClass;
 import com.knossys.rnd.test.KBDBTestClassIndexed;
 import com.knossys.rnd.test.KBDBTestClassRandom;
-import com.knossys.rnd.test.KBDBTestClassRandomSmall;
+import com.knossys.rnd.test.KBDBTestClassRandomSmallA;
+import com.knossys.rnd.test.KBDBTestClassRandomSmallB;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * 
  */
 public class AppTest extends TestCase {
   
@@ -27,8 +28,8 @@ public class AppTest extends TestCase {
   private KBDBTestClassRandom testClassRandom=null;
   private KBDBTestClassIndexed testClassIndexed=null; 
   
-  private KBDBTestClassRandomSmall testClassRandomSmall1=null; 
-  private KBDBTestClassRandomSmall testClassRandomSmall2=null; 
+  private KBDBTestClassRandomSmallA testClassRandomSmall1=null; 
+  private KBDBTestClassRandomSmallB testClassRandomSmall2=null; 
   
   /**
    * Create the test case
@@ -158,8 +159,8 @@ public class AppTest extends TestCase {
     */
     
     // Create an instance of a table/class that is small enough so that we can see what we're doing
-    testClassRandomSmall1=new KBDBTestClassRandomSmall (driver);
-    testClassRandomSmall1.setTableName ("testtablerandomsmall1");
+    testClassRandomSmall1=new KBDBTestClassRandomSmallA (driver);
+    testClassRandomSmall1.setTableName ("SmallA");
     
     // Allow the table class to configure its table schema    
     try {
@@ -175,8 +176,8 @@ public class AppTest extends TestCase {
     }
     
     // Create an instance of a table/class that is small enough so that we can see what we're doing
-    testClassRandomSmall2=new KBDBTestClassRandomSmall (driver);
-    testClassRandomSmall1.setTableName ("testtablerandomsmall1");
+    testClassRandomSmall2=new KBDBTestClassRandomSmallB (driver);
+    testClassRandomSmall2.setTableName ("SmallB");
     
     // Allow the table class to configure its table schema    
     try {
@@ -191,7 +192,23 @@ public class AppTest extends TestCase {
       testClassRandomSmall2.makeChanges(t);
     }
     
-    ArrayList<KBClass> results=null;
+    ArrayList<ArrayList<KBClass>> results=null;
+
+    results=testClassRandomSmall1.getAll();
+    
+    if (results==null) {
+      fail("Test failed, see log for details");
+    }
+    
+    testClassRandomSmall1.toTSV("./db/smalla-all.tsv", results);
+    
+    results=testClassRandomSmall2.getAll();
+    
+    if (results==null) {
+      fail("Test failed, see log for details");
+    }
+    
+    testClassRandomSmall2.toTSV("./db/smallb-all.tsv", results);
     
     results=tableOperations.joinCross(testClassRandomSmall1, testClassRandomSmall2);
     

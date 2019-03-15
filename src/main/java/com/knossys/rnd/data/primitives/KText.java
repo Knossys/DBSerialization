@@ -1,6 +1,7 @@
 package com.knossys.rnd.data.primitives;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @author vvelsen
@@ -44,7 +45,8 @@ public class KText implements KBClass {
 	 * @param aName
 	 */
 	public void setName(String aName) {
-		name=aName;
+		name = aName.replaceAll("[\\s-]+", "_");
+		
 	}
 
 	/**
@@ -101,6 +103,8 @@ public class KText implements KBClass {
 	 */
 	public void setPrimaryKey(boolean aValue) {
 		isPrimaryKey=aValue;
+		
+		setIsRequired (true);
 	}
 
 	/**
@@ -139,6 +143,15 @@ public class KText implements KBClass {
 	 * @param anEntry
 	 */
 	public void extract(ResultSet anEntry) {
+		if (anEntry==null) {
+			return;
+		}
 		
+		try {
+			value=anEntry.getString(this.name);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}	
 }

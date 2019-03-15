@@ -41,10 +41,13 @@ public class KDBTable {
 	}
 
 	/**
+	 * MySQL at least doesn't allow spaces in table names. So at least for now let's replace
+	 * whitespace with underscores.
+	 * 
 	 * @param tableName
 	 */
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
+	public void setTableName(String tableName) {		
+		this.tableName = tableName.replaceAll("\\s+", "_").toLowerCase();
 	}	
 	
 	/**
@@ -435,7 +438,7 @@ public class KDBTable {
 	/**
 	 * @param k
 	 */
-	public ArrayList<KBClass> getInstances() {		
+	public ArrayList<ArrayList<KBClass>> getInstances() {		
 		M_log.info("getInstances ()");
 		
 		if (driver==null) {
@@ -486,6 +489,23 @@ public class KDBTable {
 	}	
 	
 	/**
+	 * @param k
+	 */
+	public ArrayList<ArrayList<KBClass>> getAll() {		
+		M_log.info("getAll ()");
+		
+		if (driver==null) {
+			return (null);
+		}
+		
+		String statementString = "SELECT * FROM " + tableName + ";";
+		
+		M_log.info("Query: " + statementString);
+		
+    return (executeStatementGetAll (statementString));
+	}		
+	
+	/**
 	 * 
 	 * @return
 	 */
@@ -507,18 +527,16 @@ public class KDBTable {
     	return(false);
     }
       
-    int index=0;
-    
     if (resultSet!=null) {
     	M_log.info("We have results, extracting ...");
       try {
-        index=0;
-        while (resultSet.next() && (index<entries.size())) {
-          KBClass anEntry=entries.get(index);
-          if (anEntry.isSelected()==true) {
-            anEntry.extract (resultSet);
-            index++;
-          }
+        while (resultSet.next()) {
+        	for (int i=0;i<entries.size();i++) {
+            KBClass anEntry=entries.get(i);
+	          if (anEntry.isSelected()==true) {
+	            anEntry.extract (resultSet);
+	          }
+        	}
         }
       } catch (Exception e) {
         M_log.info("DB Exception: " + e.getMessage());
@@ -536,10 +554,10 @@ public class KDBTable {
 	 * 
 	 * @return
 	 */
-	protected ArrayList<KBClass> executeStatementGetAll (String statementString) {
+	protected ArrayList<ArrayList<KBClass>> executeStatementGetAll (String statementString) {
 	  M_log.info("executeStatementGetAll (" + statementString + ")");
 	  
-	  ArrayList<KBClass> results=new ArrayList<KBClass> ();
+	  ArrayList<ArrayList<KBClass>> results=new ArrayList<ArrayList<KBClass>> ();
 	  
     ResultSet resultSet = null;
     
@@ -555,26 +573,21 @@ public class KDBTable {
     if (resultSet==null) {
     	return(results);
     }
-      
-    int index=0;
-    int selectedCount=this.getSelectedCount();
     
     if (resultSet!=null) {
     	M_log.info("We have results, extracting ...");
       try {
-        index=0;
         while (resultSet.next()) {
-          KBClass anEntry=entries.get(index);
-          if (anEntry.isSelected()==true) {
-          	KBClass clone=anEntry.copy();
-          	clone.extract (resultSet);
-          	results.add(clone);
-            index++;
-            
-            if (index>(selectedCount-1)) {
-            	index=0;
-            }
-          }
+        	ArrayList<KBClass> row=new ArrayList<KBClass> ();
+        	for (int i=0;i<entries.size();i++) {
+	          KBClass anEntry=entries.get(i);
+	          if (anEntry.isSelected()==true) {
+	          	KBClass clone=anEntry.copy();
+	          	clone.extract (resultSet);
+	          	row.add(clone);
+	          }
+        	}
+        	results.add(row);
         }
       } catch (Exception e) {
         M_log.info("DB Exception: " + e.getMessage());
@@ -621,7 +634,7 @@ public class KDBTable {
 	/**
 	 * 
 	 */
-	public void toCSV (String aFile, ArrayList<KBClass> values) {
+	public void toCSV (String aFile, ArrayList<ArrayList<KBClass>> values) {
   	M_log.info("toCSV ("+aFile+")");
   	toSpreadSheet (aFile,"\t",values);	
 	}
@@ -629,7 +642,7 @@ public class KDBTable {
 	/**
 	 * 
 	 */
-	public void toTSV (String aFile, ArrayList<KBClass> values) {
+	public void toTSV (String aFile, ArrayList<ArrayList<KBClass>> values) {
   	M_log.info("toTSV ("+aFile+")");
   	toSpreadSheet (aFile,"\t",values);
 	}	
@@ -637,7 +650,7 @@ public class KDBTable {
 	/**
 	 * 
 	 */
-	public void toSpreadSheet (String aFile, String aSeparator, ArrayList<KBClass> values) {
+	public void toSpreadSheet (String aFile, String aSeparator, ArrayList<ArrayList<KBClass>> values) {
   	M_log.info("toSpreadSheet ("+aFile+")");
 
     FileWriter writer=null;
@@ -649,25 +662,49 @@ public class KDBTable {
 			return;
 		}
 		
-		int rowSize=getSelectedCount ();
+	  int selectedCount=this.getSelectedCount();
 		int index=0;
 		
 		try {
+			for (int i=0;i<entries.size();i++) {
+				KBClass entry=entries.get(i);
+				
+				if (entry.isSelected()==true) {
+					if (index!=0) {
+						writer.write (aSeparator);
+					}
+					
+					writer.write(entry.getName());
+					
+					index++;
+					
+					if (index>(selectedCount-1)) {
+						writer.write("\n");
+						index=0;
+					}
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;			
+		}
+				
+		try {
 			for (int i=0;i<values.size();i++) {
-				KBClass entry=values.get(i);
+				ArrayList<KBClass> row=values.get(i);
 				
-				if (index!=0) {
-					writer.write (aSeparator);
+				for (int j=0;j<row.size();j++) {
+					KBClass entry=row.get(j);
+					
+				  if (j>0) {
+					  writer.write (aSeparator);
+				  }
+				
+			  	writer.write(entry.getValue().toString());
 				}
 				
-				writer.write(""+entry.getValue());
-				
-				index++;
-				
-				if (index>(rowSize-1)) {
-					writer.write("\n");
-					index=0;
-				}
+				writer.write("\n");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

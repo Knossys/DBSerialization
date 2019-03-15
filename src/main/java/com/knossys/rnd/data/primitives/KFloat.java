@@ -63,7 +63,7 @@ public class KFloat implements KBClass {
 	 * @param aName
 	 */
 	public void setName(String aName) {
-		name=aName;
+		name = aName.replaceAll("[\\s-]+", "_");
 	}
 
 	/**
@@ -120,6 +120,8 @@ public class KFloat implements KBClass {
 	 */
 	public void setPrimaryKey(boolean aValue) {
 		isPrimaryKey=aValue;
+		
+		setIsRequired (true);
 	}
 
 	/**

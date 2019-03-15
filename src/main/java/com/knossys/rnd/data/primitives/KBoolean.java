@@ -67,7 +67,7 @@ public class KBoolean implements KBClass {
 	 * @param aName
 	 */
 	public void setName(String aName) {
-		name=aName;
+		name = aName.replaceAll("[\\s-]+", "_");
 	}
 
 	/**
@@ -124,6 +124,8 @@ public class KBoolean implements KBClass {
 	 */
 	public void setPrimaryKey(boolean aValue) {
 		isPrimaryKey=aValue;
+		
+		setIsRequired (true);
 	}
 
 	/**
@@ -137,25 +139,50 @@ public class KBoolean implements KBClass {
 	 * 
 	 */
 	public String generateSchema() {
+		
+		/*
     if (isRequired==true) {
     	return (name + " TINYINT(1) NOT NULL");
     }
 		
     return (name + " TINYINT(1)");
+    */
+		
+    if (isRequired==true) {
+    	return (name + " INT NOT NULL");
+    }
+		
+    return (name + " INT");		
 	}
 
 	/**
 	 * 
 	 */
 	public String generateCreateStatement() {
-		return getValue ().toString();
+		Integer converter=0;
+		
+		if (value==true) {
+			converter=1;
+		} else {
+			converter=0;
+			
+		}
+		return converter.toString();
 	}
 
 	/**
 	 * 
 	 */
 	public String generateUpdateStatement() {
-		return getValue ().toString();
+		Integer converter=0;
+		
+		if (value==true) {
+			converter=1;
+		} else {
+			converter=0;
+			
+		}
+		return converter.toString();
 	}
 	
 	/**
@@ -166,11 +193,29 @@ public class KBoolean implements KBClass {
 			return;
 		}
 		
+		/*
 		try {
 			value=anEntry.getBoolean(this.name);
+			//System.out.println("New value " + this.name + ": " + anEntry.getBoolean(this.name) +" -> " + anEntry.getInt(this.name));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		*/
+		
+		Integer testValue=0;
+		
+		try {
+			testValue=anEntry.getInt(this.name);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (testValue==1) {
+			value=false;
+		} else {
+			value=true;
 		}
 	}
 }

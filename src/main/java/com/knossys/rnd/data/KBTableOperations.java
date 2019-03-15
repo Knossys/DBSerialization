@@ -38,12 +38,16 @@ public class KBTableOperations extends KDBTable {
 	  
 	  for (int i=0;i<leftEntries.size();i++) {
 	    KBClass test=leftEntries.get(i);
-	    entries.add(test);
+	    if (test.isSelected()==true) {
+	      entries.add(test);
+	    }
 	  }
 	  
     for (int j=0;j<rightEntries.size();j++) {
       KBClass test=rightEntries.get(j);
-      entries.add(test);
+      if (test.isSelected()==true) {
+        entries.add(test);
+      }
     }	  
 	}
 	
@@ -52,7 +56,7 @@ public class KBTableOperations extends KDBTable {
 	 * @param right
 	 * @return
 	 */
-	public ArrayList<KBClass> joinCross (KDBTable left, KDBTable right) {
+	public ArrayList<ArrayList<KBClass>> joinCross (KDBTable left, KDBTable right) {
     M_log.info("joinCross ()");
     
 		StringBuffer statement=new StringBuffer ();
@@ -69,7 +73,7 @@ public class KBTableOperations extends KDBTable {
 	 * @param right
 	 * @return
 	 */
-	public ArrayList<KBClass> joinInner (KDBTable left, KDBTable right) {
+	public ArrayList<ArrayList<KBClass>> joinInner (KDBTable left, KDBTable right) {
     M_log.info("joinInner ()");
     
 		StringBuffer statement=new StringBuffer ();
@@ -89,7 +93,7 @@ public class KBTableOperations extends KDBTable {
    * @param right
    * @return
    */
-  public ArrayList<KBClass> joinOutterLeft (KDBTable left, KDBTable right) {
+  public ArrayList<ArrayList<KBClass>> joinOutterLeft (KDBTable left, KDBTable right) {
     M_log.info("joinOutterLeft ()");
     
     StringBuffer statement=new StringBuffer ();
@@ -111,7 +115,7 @@ public class KBTableOperations extends KDBTable {
    * @param right
    * @return
    */
-  public ArrayList<KBClass> joinOutterRight (KDBTable left, KDBTable right) {
+  public ArrayList<ArrayList<KBClass>> joinOutterRight (KDBTable left, KDBTable right) {
     M_log.info("joinOutterRight ()");
     
     if (driver.getDriverType().equalsIgnoreCase("SQLITE")==true) {
@@ -138,7 +142,7 @@ public class KBTableOperations extends KDBTable {
    * @param right
    * @return
    */
-  public ArrayList<KBClass> joinOutterFull (KDBTable left, KDBTable right) {
+  public ArrayList<ArrayList<KBClass>> joinOutterFull (KDBTable left, KDBTable right) {
     M_log.info("joinOutterFull ()");
     
     if (driver.getDriverType().equalsIgnoreCase("SQLITE")==true) {
