@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * @author vvelsen
  */
-public class SQLiteDriver extends DbBaseDriver {
+public class SQLiteDriver extends DbBaseDriver implements DbDriverInterface {
 	
 	private static Logger M_log = Logger.getLogger(SQLiteDriver.class.getName());
 	
@@ -87,7 +87,7 @@ public class SQLiteDriver extends DbBaseDriver {
 	/**
 	 * 
 	 */
-	protected void configureEnvironment () {	
+	public void configureEnvironment () {	
 		M_log.info("configureEnvironment ()");	
 		
 		M_log.info("IMPLEMENT IN CHILD CLASS!");

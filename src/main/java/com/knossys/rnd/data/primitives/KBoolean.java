@@ -140,19 +140,19 @@ public class KBoolean implements KBClass {
 	 */
 	public String generateSchema() {
 		
-		/*
     if (isRequired==true) {
     	return (name + " TINYINT(1) NOT NULL");
     }
 		
     return (name + " TINYINT(1)");
-    */
-		
+    
+		/*
     if (isRequired==true) {
     	return (name + " INT NOT NULL");
     }
 		
     return (name + " INT");		
+    */
 	}
 
 	/**
@@ -193,7 +193,6 @@ public class KBoolean implements KBClass {
 			return;
 		}
 		
-		/*
 		try {
 			value=anEntry.getBoolean(this.name);
 			//System.out.println("New value " + this.name + ": " + anEntry.getBoolean(this.name) +" -> " + anEntry.getInt(this.name));
@@ -201,8 +200,8 @@ public class KBoolean implements KBClass {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		*/
-		
+	
+		/*
 		Integer testValue=0;
 		
 		try {
@@ -213,9 +212,10 @@ public class KBoolean implements KBClass {
 		}
 		
 		if (testValue==1) {
-			value=false;
-		} else {
 			value=true;
+		} else {
+			value=false;
 		}
+		*/
 	}
 }

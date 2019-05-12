@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 /**
  * @author vvelsen
  */
-public class MySQLDriver extends MySQLSSHDriver {
+public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
 	
 	private static Logger M_log = Logger.getLogger(MySQLDriver.class.getName());
 	
@@ -48,7 +48,7 @@ public class MySQLDriver extends MySQLSSHDriver {
 	/**
 	 * 
 	 */
-	protected void configureEnvironment () {	
+	public void configureEnvironment () {	
 		M_log.info("configureEnvironment ()");
 		
 		if (System.getProperty("dbPort")!=null) {
