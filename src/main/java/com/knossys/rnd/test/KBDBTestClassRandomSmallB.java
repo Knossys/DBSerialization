@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.Random;
 
 import com.knossys.rnd.data.KDBTable;
-import com.knossys.rnd.data.SQLiteDriver;
+import com.knossys.rnd.data.db.DbDriverInterface;
 import com.knossys.rnd.data.primitives.KBoolean;
 import com.knossys.rnd.data.primitives.KInteger;
 import com.knossys.rnd.data.primitives.KLong;
@@ -21,7 +21,7 @@ public class KBDBTestClassRandomSmallB extends KDBTable {
 	/**
 	 * 
 	 */
-	public KBDBTestClassRandomSmallB (SQLiteDriver aDriver) {
+	public KBDBTestClassRandomSmallB (DbDriverInterface aDriver) {
 		super(aDriver);
 		
 		setTableName ("smalltableb");

@@ -9,6 +9,7 @@ package com.knossys.rnd.data;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import com.knossys.rnd.data.db.DbDriverInterface;
 import com.knossys.rnd.data.primitives.KBClass;
 
 /**
@@ -21,7 +22,7 @@ public class KBTableOperations extends KDBTable {
 	/**
 	 * @param aDriver
 	 */
-	public KBTableOperations(SQLiteDriver aDriver) {
+	public KBTableOperations(DbDriverInterface aDriver) {
 		super(aDriver);
 	}
 
@@ -118,7 +119,7 @@ public class KBTableOperations extends KDBTable {
   public ArrayList<ArrayList<KBClass>> joinOutterRight (KDBTable left, KDBTable right) {
     M_log.info("joinOutterRight ()");
     
-    if (driver.getDriverType().equalsIgnoreCase("SQLITE")==true) {
+    if (driver.supportJoinOutterRight()==false) {
     	M_log.info("SQLITE doesn't support this operation yet");
     	return (null);
     }
@@ -145,7 +146,7 @@ public class KBTableOperations extends KDBTable {
   public ArrayList<ArrayList<KBClass>> joinOutterFull (KDBTable left, KDBTable right) {
     M_log.info("joinOutterFull ()");
     
-    if (driver.getDriverType().equalsIgnoreCase("SQLITE")==true) {
+    if (driver.joinOutterFull ()==false) {
     	M_log.info("SQLITE doesn't support this operation yet");
     	return (null);
     }   
@@ -161,4 +162,56 @@ public class KBTableOperations extends KDBTable {
     
     return (executeStatementGetAll (statement.toString()));
   }
+  
+  /**
+   * Make a copy of the entire table. ONLY use this for small tables. We need this however
+   * so that we can support tables being send across the network. In most cases this should
+   * not be an issue because copy will most likely be called on tables that represent
+   * snippets of data.
+   * 
+   * @return
+   */
+  public KDBTable copy () {
+  	KDBTable newTable=new KDBTable (this.driver);
+  	
+  	ArrayList<KBClass> entries=new ArrayList<KBClass> ();
+	  
+	  ArrayList<KBClass> fromEntries=this.getEntries();
+  	
+	  for (int i=0;i<fromEntries.size();i++) {
+	    KBClass test=fromEntries.get(i);
+      KBClass copy=test.copy();
+      entries.add(copy);
+	  }
+
+  	newTable.entries=entries;
+  			
+  	return (newTable);
+  }
+  
+  /**
+   * Make a copy of the entire table. ONLY use this for small tables. We need this however
+   * so that we can support tables being send across the network. In most cases this should
+   * not be an issue because copy will most likely be called on tables that represent
+   * snippets of data.
+   * 
+   * @return
+   */
+  public KDBTable copy (KDBTable aSource) {
+  	KDBTable newTable=new KDBTable (this.driver);
+  	
+  	ArrayList<KBClass> entries=new ArrayList<KBClass> ();
+	  
+	  ArrayList<KBClass> fromEntries=aSource.getEntries();
+  	
+	  for (int i=0;i<fromEntries.size();i++) {
+	    KBClass test=fromEntries.get(i);
+      KBClass copy=test.copy();
+      entries.add(copy);
+	  }
+
+  	newTable.entries=entries;
+  			
+  	return (newTable);
+  }  
 }

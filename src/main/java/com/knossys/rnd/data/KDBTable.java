@@ -12,6 +12,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import com.knossys.rnd.data.db.DbDriverInterface;
 import com.knossys.rnd.data.primitives.KBClass;
 
 /**
@@ -24,12 +25,12 @@ public class KDBTable {
 	protected String tableName="unassigned";
 	protected ArrayList<KBClass> entries=new ArrayList<KBClass> ();
 	
-	protected SQLiteDriver driver=null;
+	protected DbDriverInterface driver=null;
 	
 	/**
 	 * 
 	 */
-	public KDBTable (SQLiteDriver aDriver) {
+	public KDBTable (DbDriverInterface aDriver) {
 		driver=aDriver;
 	}
 	
@@ -687,6 +688,12 @@ public class KDBTable {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			try {
+				writer.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			return;			
 		}
 				

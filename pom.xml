@@ -5,7 +5,7 @@
 
   <groupId>com.knossys.rnd</groupId>
   <artifactId>dbserialization</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.3.4</version>
   <packaging>jar</packaging>
 
   <name>knossys</name>
@@ -20,7 +20,21 @@
   </properties>
 
   <dependencies>
-
+  
+    <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.14</version>
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.9</version>
+    </dependency>
+      
     <!--
     <dependency>
       <groupId>log4j</groupId>
@@ -97,7 +111,7 @@
   </dependencies>
 
   <build>
-    <finalName>KDBSerialization</finalName>
+    <finalName>${project.artifactId}-${version}</finalName>
     <plugins>
 
       <!-- Set a compiler level -->
@@ -108,6 +122,9 @@
         <configuration>
           <source>${jdk.version}</source>
           <target>${jdk.version}</target>
+          <archive>
+            <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+          </archive>          
         </configuration>
       </plugin>
       

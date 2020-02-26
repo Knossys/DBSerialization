@@ -3,7 +3,7 @@ package com.knossys.rnd.test;
 import java.util.Random;
 
 import com.knossys.rnd.data.KDBTable;
-import com.knossys.rnd.data.SQLiteDriver;
+import com.knossys.rnd.data.db.DbDriverInterface;
 import com.knossys.rnd.data.primitives.KBoolean;
 import com.knossys.rnd.data.primitives.KDouble;
 import com.knossys.rnd.data.primitives.KFloat;
@@ -30,7 +30,7 @@ public class KBDBTestClassIndexed extends KDBTable {
 	/**
 	 * 
 	 */
-	public KBDBTestClassIndexed (SQLiteDriver aDriver) {
+	public KBDBTestClassIndexed (DbDriverInterface aDriver) {
 		super(aDriver);
 		
 		setTableName ("testtableindexed");

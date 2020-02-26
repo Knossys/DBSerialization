@@ -5,8 +5,10 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 import com.knossys.rnd.data.KBTableOperations;
-import com.knossys.rnd.data.SQLiteDriver;
+import com.knossys.rnd.data.KDBTable;
+import com.knossys.rnd.data.db.SQLiteDriver;
 import com.knossys.rnd.data.primitives.KBClass;
+
 import com.knossys.rnd.test.KBDBTestClassIndexed;
 import com.knossys.rnd.test.KBDBTestClassRandom;
 import com.knossys.rnd.test.KBDBTestClassRandomSmallA;
@@ -30,6 +32,8 @@ public class AppTest extends TestCase {
   
   private KBDBTestClassRandomSmallA testClassRandomSmall1=null; 
   private KBDBTestClassRandomSmallB testClassRandomSmall2=null; 
+
+  private KBDBTestClassRandomSmallA testSourceTable=null; 
   
   /**
    * Create the test case
@@ -82,7 +86,7 @@ public class AppTest extends TestCase {
     //Create an instance of the table/class that has an index as the primary key
     testClassIndexed=new KBDBTestClassIndexed (driver);
     
-    // Configure the database driver
+    // Configure the database driver, in this case specific to SQLite
     driver.setDbPath ("./db");
     driver.setDbName ("testdb");
     driver.init ();
@@ -245,6 +249,23 @@ public class AppTest extends TestCase {
       fail("Test failed, see log for details");
     }
     */    
+    
+    //>--------------------------------------------------------------------------------
+    
+    testSourceTable=new KBDBTestClassRandomSmallA (driver);
+    testSourceTable.setTableName ("SourceTable");
+        
+    // Allow the table class to configure its table schema    
+    try {
+    	testSourceTable.prepTables ();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return;
+    }
+    
+    KDBTable result=tableOperations.copy (testSourceTable);
+    
+    tableOperations.toTSV("./db/table-copy.tsv", result.getAll());
     
     assertTrue(true);
   }

@@ -1,90 +1,77 @@
-/**
- * https://stackoverflow.com/questions/24676111/streaming-mysql-resultset-with-fixed-number-of-results-at-a-time
- */
-package com.knossys.rnd.data;
+package com.knossys.rnd.data.db;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.File;
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+ 
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
 /**
  * @author vvelsen
  */
-public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
+public class SQLiteDriver implements DbDriverInterface {
 	
-	private static Logger M_log = Logger.getLogger(MySQLDriver.class.getName());
+	private static Logger M_log = Logger.getLogger(SQLiteDriver.class.getName());
 	
 	protected Boolean active = false;
+	
+	private Connection conn = null;
 			
 	protected String useUnicode="true";
 	protected String useJDBCCompliantTimezoneShift="true";
 	protected String useLegacyDatetimeCode="false";
 	protected String serverTimezone="UTC";	
 
+	protected String dbName="default";
+	protected String dbTable="default";
+	protected String dbPath="/tmp";
+	
+	/**
+	 * @param string
+	 */
+	public void setDbPath(String aValue) {
+		dbPath=aValue;
+	}
+
+	/**
+	 * @param string
+	 */
+	public void setDbName(String aValue) {
+		dbTable=aValue;
+	}
+	
 	/**
 	 * 
 	 * @return
 	 */
+	/*
 	public Boolean getActive() {
 		if (conn == null) {
 			active = false;
 		}
 		return active;
 	}
+	*/
 
 	/**
 	 * 
 	 * @param active
 	 */
+	/*
 	public void setActive(Boolean active) {
 		this.active = active;
 	}
+	*/
 	
 	/**
 	 * 
 	 */
-	public void configureEnvironment () {	
-		M_log.info("configureEnvironment ()");
-		
-		if (System.getProperty("dbPort")!=null) {
-			String tempPort=System.getProperty("dbPort");
-			
-			dbPort=Integer.parseInt(tempPort);
-		}		
-		
-		if (System.getProperty("dbName")!=null) {
-			dbName=System.getProperty("dbName");
-		}
-		
-		if (System.getProperty("dbTable")!=null) {
-			dbTable=System.getProperty("dbTable");
-		}
-		
-		if (System.getProperty("dbUsername")!=null) {
-			dbUsername=System.getProperty("dbUsername");
-		}
-		
-		if (System.getProperty("dbHost")!=null) {
-			//M_log.info ("Found dbHost to be: " + System.getProperty("dbHost"));
-			dbHost=System.getProperty("dbHost");
-		}
-		
-		if (System.getProperty("dbPassword")!=null) {
-			dbPassword=System.getProperty("dbPassword");
-		}	
-		
-		if (System.getProperty("dbTunnel")!=null) {
-			if (System.getProperty("dbTunnel").equalsIgnoreCase("true")==true) {
-				setUseTunnel(true);
-			} else {
-				setUseTunnel(false);
-			}
-		}			
+	protected void configureEnvironment () {	
+		M_log.info("configureEnvironment ()");		
 	}
 
 	/**
@@ -95,18 +82,11 @@ public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
 		
 		configureEnvironment ();		
 		
-		super.init();
-
 		if (active==true) {
 			M_log.info ("Database connection already initalized, bump");
 			return;
 		}
 			
-		if ((dbHost.isEmpty()==true) || (dbName.isEmpty()==true) || (dbTable.isEmpty()==true) || (dbUsername.isEmpty()==true) || (dbPassword.isEmpty()==true)){
-			M_log.info ("The service has not been configured yet, please modify or use standalone.xml as provided in the code repository");
-			return;			
-		}
-		
     connect ();
 		
 		try {
@@ -124,45 +104,27 @@ public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
 	 * 
 	 */
 	public Boolean connect () {
-		M_log.info("connect ("+dbHost+")");
+		M_log.info("connect ()");
 		
-		if (openTunnel ()==false) {
-			return (false);
-		}
-		
-		InetAddress address;
-		try {
-			address = InetAddress.getByName(dbHost);
-		} catch (UnknownHostException e1) {
-      M_log.info ("Can't resolve MySQL hostname: " + e1.getMessage());
-			return (false);
-		} 
-		
-		M_log.info ("Resolved MySQL hostname to: " + address.getHostAddress()); 
-		
-		String safeAddress=address.getHostAddress();
-		
-		M_log.info("Determined safe ip address to be: " + safeAddress);
-		
-		try {
-			Class.forName(driverName);
-		} catch (ClassNotFoundException e) {
-			M_log.info("Error loading JDBC driver: " + e.getMessage());
-			return (false);
-		}
-
 		M_log.info("Driver loaded, connecting to database ...");
 		
-		String jdbcConfig="jdbc:mysql://"+safeAddress+":"+dbPort+"/"+dbName+"?useUnicode="+useUnicode+"&useJDBCCompliantTimezoneShift="+useJDBCCompliantTimezoneShift+"&useLegacyDatetimeCode="+useLegacyDatetimeCode+"&serverTimezone="+serverTimezone+"&user="+dbUsername+"&password="+dbPassword+"&useSSL="+useSSL;
+    File directory = new File(dbPath);
+    if (!directory.exists()){
+      directory.mkdirs();
+    }
 		
-		/*
-		 * Be very careful with the debug line below since it will show usernames and passwords
-		 */
-		
+		String jdbcConfig="jdbc:sqlite:"+dbPath+"/"+dbName+".db";
+				
 		M_log.info("Using jdb string: " + jdbcConfig);
 
 		try {
-			conn = DriverManager.getConnection(jdbcConfig,dbUsername,dbPassword);
+			conn = DriverManager.getConnection(jdbcConfig);
+			
+      if (conn != null) {
+        DatabaseMetaData meta = conn.getMetaData();
+        System.out.println("The driver name is " + meta.getDriverName());
+        System.out.println("A new database has been created.");
+      }			
 		} catch (SQLException e) {
 			M_log.info("Error starting JDBC driver: " + e.getMessage());
 			//e.printStackTrace();
@@ -175,12 +137,6 @@ public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
 
 		active = true;
 		
-		/*
-		if (getUseTunnel()==true) {
-		  showTables ();
-		}
-		*/
-		
 		return (true);
 	}
 	
@@ -190,10 +146,6 @@ public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
 	public Boolean close() {
 		M_log.info("close ()");
 		
-		if (super.close()==false) {
-			return (false);
-		}
-
 		if (conn == null) {
 			M_log.info("Internal error: no DB connection available");
 			active = false;
@@ -419,8 +371,6 @@ public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
 	public ResultSet executeQuery(Statement statement, String statementString) {
 		M_log.info("executeQuery ()");
 		
-		M_log.info(statementString);
-		
 		ResultSet resultSet=null;
 		Boolean retry=false;
 		
@@ -484,47 +434,16 @@ public class MySQLDriver extends MySQLSSHDriver implements DbDriverInterface {
 	}
 	
 	/**
-	 * 
+	 * @return
 	 */
-	public void showTables () {
-		M_log.info("showTables ()");
-		
-		if (conn==null) {
-			M_log.info("Error: no db connection available");
-			return;
-		}
-		
-		DatabaseMetaData md=null;
-		
-		try {
-			md = conn.getMetaData();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		
-		ResultSet rs=null;
-		
-		try {
-			rs = md.getTables(null, null, "%", null);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		
-		int index=0;
-		
-		try {
-			while (rs.next()) {
-			  M_log.info("Table ["+dbName+"]["+index+"]: " + rs.getString(3));
-			  index++;
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
+	public Boolean supportJoinOutterRight () {
+		return (false);
+	}
+	
+	/**
+	 * @return
+	 */
+	public Boolean joinOutterFull () {
+		return (false);
 	}
 }
