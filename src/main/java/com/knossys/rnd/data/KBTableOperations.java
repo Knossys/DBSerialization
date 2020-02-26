@@ -172,19 +172,17 @@ public class KBTableOperations extends KDBTable {
    * @return
    */
   public KDBTable copy () {
+    M_log.info("copy ()");
+    
   	KDBTable newTable=new KDBTable (this.driver);
-  	
-  	ArrayList<KBClass> entries=new ArrayList<KBClass> ();
 	  
 	  ArrayList<KBClass> fromEntries=this.getEntries();
   	
 	  for (int i=0;i<fromEntries.size();i++) {
 	    KBClass test=fromEntries.get(i);
       KBClass copy=test.copy();
-      entries.add(copy);
+      newTable.entries.add(copy);
 	  }
-
-  	newTable.entries=entries;
   			
   	return (newTable);
   }
@@ -198,19 +196,18 @@ public class KBTableOperations extends KDBTable {
    * @return
    */
   public KDBTable copy (KDBTable aSource) {
+    M_log.info("copy (KDBTable)");
+    
   	KDBTable newTable=new KDBTable (this.driver);
   	
-  	ArrayList<KBClass> entries=new ArrayList<KBClass> ();
-	  
 	  ArrayList<KBClass> fromEntries=aSource.getEntries();
+	  
+	  M_log.info("Copying " + fromEntries.size() + " entries ...");
   	
 	  for (int i=0;i<fromEntries.size();i++) {
 	    KBClass test=fromEntries.get(i);
-      KBClass copy=test.copy();
-      entries.add(copy);
+	    newTable.entries.add(test.copy());
 	  }
-
-  	newTable.entries=entries;
   			
   	return (newTable);
   }  

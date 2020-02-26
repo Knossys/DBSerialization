@@ -25,6 +25,8 @@ public class AppTest extends TestCase {
   
   private static Logger M_log = Logger.getLogger(AppTest.class.getName());
   
+  // Use SQLite for this test. There should be a separate but similar test
+  // with the MySQL and Cassandra drivers
   private SQLiteDriver driver=new SQLiteDriver ();
   
   private KBDBTestClassRandom testClassRandom=null;
@@ -162,6 +164,8 @@ public class AppTest extends TestCase {
     }
     */
     
+    //>--------------------------------------------------------------------------------
+    
     // Create an instance of a table/class that is small enough so that we can see what we're doing
     testClassRandomSmall1=new KBDBTestClassRandomSmallA (driver);
     testClassRandomSmall1.setTableName ("SmallA");
@@ -189,7 +193,7 @@ public class AppTest extends TestCase {
     } catch (Exception e) {
       e.printStackTrace();
       return;
-    }     
+    }
     
     // Generate 10 random instances
     for (long t=0;t<10;t++) {
@@ -214,12 +218,14 @@ public class AppTest extends TestCase {
     
     testClassRandomSmall2.toTSV("./db/smallb-all.tsv", results);
     
+    //>--------------------------------------------------------------------------------
+    
     results=tableOperations.joinCross(testClassRandomSmall1, testClassRandomSmall2);
     
     if (results==null) {
       fail("Test failed, see log for details");
     }
-    
+        
     tableOperations.toTSV("./db/table-join-cross.tsv", results);
         
     results=tableOperations.joinInner(testClassRandomSmall1, testClassRandomSmall2);
@@ -265,7 +271,7 @@ public class AppTest extends TestCase {
     
     KDBTable result=tableOperations.copy (testSourceTable);
     
-    tableOperations.toTSV("./db/table-copy.tsv", result.getAll());
+    tableOperations.toTSV("./db/table-copy.tsv", result.getInstances());
     
     assertTrue(true);
   }
