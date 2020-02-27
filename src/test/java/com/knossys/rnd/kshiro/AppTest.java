@@ -28,15 +28,13 @@ public class AppTest extends TestCase {
   
   // Use SQLite for this test. There should be a separate but similar test
   // with the MySQL and Cassandra drivers
-  private SQLiteDriver driver=new SQLiteDriver ();
+  private SQLiteDriver driver=null;
   
   private KBDBTestClassRandom testClassRandom=null;
   private KBDBTestClassIndexed testClassIndexed=null; 
   
   private KBDBTestClassRandomSmallA testClassRandomSmall1=null; 
   private KBDBTestClassRandomSmallB testClassRandomSmall2=null; 
-
-  private KBDBTestClassRandomSmallA testSourceTable=null; 
   
   /**
    * Create the test case
@@ -80,6 +78,12 @@ public class AppTest extends TestCase {
   public void testApp() {  	  	
     M_log.info("testApp ()");
     
+    driver=new SQLiteDriver ();
+    // Configure the database driver, in this case specific to SQLite
+    driver.setDbPath ("./db");
+    driver.setDbName ("testdb");
+    driver.init ();
+    
     // How many random instances do we want per test/table
     int maxEntries=10000;
 
@@ -88,12 +92,7 @@ public class AppTest extends TestCase {
     
     //Create an instance of the table/class that has an index as the primary key
     testClassIndexed=new KBDBTestClassIndexed (driver);
-    
-    // Configure the database driver, in this case specific to SQLite
-    driver.setDbPath ("./db");
-    driver.setDbName ("testdb");
-    driver.init ();
-        
+            
     // Generate 1000 random instances
     for (long t=0;t<1000;t++) {
     	testClassRandom.makeChanges(t);
