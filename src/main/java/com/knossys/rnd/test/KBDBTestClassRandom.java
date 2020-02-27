@@ -37,14 +37,14 @@ public class KBDBTestClassRandom extends KDBTable {
 		setTableName ("testtablerandom");
 		
 		longEntry.setPrimaryKey(true);
-    addEntry (longEntry);
-    addEntry (guidEntry);
-    addEntry (doubleEntry);
-    addEntry (floatEntry);
-    addEntry (stringEntry);
-    addEntry (textEntry);
-    addEntry (booleanEntry);
-    addEntry (integerEntry);
+    addColumn (longEntry);
+    addColumn (guidEntry);
+    addColumn (doubleEntry);
+    addColumn (floatEntry);
+    addColumn (stringEntry);
+    addColumn (textEntry);
+    addColumn (booleanEntry);
+    addColumn (integerEntry);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class KBDBTestClassRandom extends KDBTable {
     booleanEntry.setValue(r.nextBoolean());
     integerEntry.setValue(r.nextInt());
 				
-		modify ();
+		persist ();
 	}
 	
 	/**
@@ -95,6 +95,6 @@ public class KBDBTestClassRandom extends KDBTable {
     booleanEntry.setValue(r.nextBoolean());
     integerEntry.setValue(r.nextInt());
 				
-		modify ();
+		persist ();
 	}	
 }

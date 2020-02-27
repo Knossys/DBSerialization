@@ -13,6 +13,7 @@ import com.knossys.rnd.test.KBDBTestClassIndexed;
 import com.knossys.rnd.test.KBDBTestClassRandom;
 import com.knossys.rnd.test.KBDBTestClassRandomSmallA;
 import com.knossys.rnd.test.KBDBTestClassRandomSmallB;
+import com.knossys.rnd.test.KBDBTestClassRandomSmallSource;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -92,23 +93,7 @@ public class AppTest extends TestCase {
     driver.setDbPath ("./db");
     driver.setDbName ("testdb");
     driver.init ();
-    
-    // Allow the table class to configure its table schema
-    try {
-      testClassRandom.prepTables ();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return;
-    }
-
-    // Allow the table class to configure its table schema    
-    try {
-      testClassIndexed.prepTables ();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return;
-    }
-    
+        
     // Generate 1000 random instances
     for (long t=0;t<1000;t++) {
     	testClassRandom.makeChanges(t);
@@ -170,14 +155,6 @@ public class AppTest extends TestCase {
     testClassRandomSmall1=new KBDBTestClassRandomSmallA (driver);
     testClassRandomSmall1.setTableName ("SmallA");
     
-    // Allow the table class to configure its table schema    
-    try {
-      testClassRandomSmall1.prepTables ();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return;
-    }    
-    
     // Generate 10 random instances
     for (long t=0;t<10;t++) {
       testClassRandomSmall1.makeChanges(t);
@@ -186,15 +163,7 @@ public class AppTest extends TestCase {
     // Create an instance of a table/class that is small enough so that we can see what we're doing
     testClassRandomSmall2=new KBDBTestClassRandomSmallB (driver);
     testClassRandomSmall2.setTableName ("SmallB");
-    
-    // Allow the table class to configure its table schema    
-    try {
-      testClassRandomSmall2.prepTables ();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return;
-    }
-    
+
     // Generate 10 random instances
     for (long t=0;t<10;t++) {
       testClassRandomSmall2.makeChanges(t);
@@ -220,6 +189,7 @@ public class AppTest extends TestCase {
     
     //>--------------------------------------------------------------------------------
     
+    /*
     results=tableOperations.joinCross(testClassRandomSmall1, testClassRandomSmall2);
     
     if (results==null) {
@@ -246,32 +216,34 @@ public class AppTest extends TestCase {
     
     // RIGHT and FULL OUTER JOINs are not currently supported in SQLite
     
-    /*
-    if (tableOperations.joinOutterRight(testClassRandomSmall1, testClassRandomSmall2)==null) {
-      fail("Test failed, see log for details");
-    }
     
-    if (tableOperations.joinOutterFull(testClassRandomSmall1, testClassRandomSmall2)==null) {
-      fail("Test failed, see log for details");
-    }
-    */    
+    //if (tableOperations.joinOutterRight(testClassRandomSmall1, testClassRandomSmall2)==null) {
+    //  fail("Test failed, see log for details");
+    //}
     
+    //if (tableOperations.joinOutterFull(testClassRandomSmall1, testClassRandomSmall2)==null) {
+    //  fail("Test failed, see log for details");
+    //}
+    
+    */
+        
     //>--------------------------------------------------------------------------------
     
-    testSourceTable=new KBDBTestClassRandomSmallA (driver);
-    testSourceTable.setTableName ("SourceTable");
+    KBDBTestClassRandomSmallSource testSourceTable=new KBDBTestClassRandomSmallSource (driver);
         
-    // Allow the table class to configure its table schema    
-    try {
-    	testSourceTable.prepTables ();
-    } catch (Exception e) {
-      e.printStackTrace();
-      return;
-    }
+    // Generate 10 random instances
+    for (long t=0;t<10;t++) {
+    	testSourceTable.makeChanges(t);
+    }    
     
-    KDBTable result=tableOperations.copy (testSourceTable);
+    //KDBTable tableCopy=tableOperations.copy (testSourceTable);
+    KDBTable testCopyTable=testSourceTable.copy ();    
+
+    tableOperations.toTSV("./db/table-source.tsv", testSourceTable);
+    tableOperations.toTSV("./db/table-copy.tsv", testCopyTable);
     
-    tableOperations.toTSV("./db/table-copy.tsv", result.getInstances());
+    testSourceTable.persist();
+    testCopyTable.persist();
     
     assertTrue(true);
   }

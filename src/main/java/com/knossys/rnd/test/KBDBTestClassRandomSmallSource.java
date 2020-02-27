@@ -12,19 +12,19 @@ import com.knossys.rnd.data.primitives.KLong;
 /**
  * @author vvelsen
  */
-public class KBDBTestClassRandomSmallB extends KDBTable {
+public class KBDBTestClassRandomSmallSource extends KDBTable {
 
-	public KLong longEntry=new KLong ("b-key",new Date ().getTime()); // Primary key
-	public KBoolean booleanEntry=new KBoolean ("b-boolean",true);	
-	public KInteger integerEntry=new KInteger ("b-integer",0);	
+	public KLong longEntry=new KLong ("a-key",new Date ().getTime()); // Primary key
+	public KBoolean booleanEntry=new KBoolean ("a-boolean",true);	
+	public KInteger integerEntry=new KInteger ("a-integer",0);	
 	
 	/**
 	 * 
 	 */
-	public KBDBTestClassRandomSmallB (DbDriverInterface aDriver) {
+	public KBDBTestClassRandomSmallSource (DbDriverInterface aDriver) {
 		super(aDriver);
 		
-		setTableName ("smalltableb");
+		setTableName ("testsource");
 		
 		longEntry.setPrimaryKey(true);
     addColumn (longEntry);

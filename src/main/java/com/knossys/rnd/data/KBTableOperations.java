@@ -34,8 +34,8 @@ public class KBTableOperations extends KDBTable {
 	  
 	  entries=new ArrayList<KBClass> ();
 	  
-	  ArrayList<KBClass> leftEntries=left.getEntries();
-	  ArrayList<KBClass> rightEntries=right.getEntries();
+	  ArrayList<KBClass> leftEntries=left.getColumns();
+	  ArrayList<KBClass> rightEntries=right.getColumns();
 	  
 	  for (int i=0;i<leftEntries.size();i++) {
 	    KBClass test=leftEntries.get(i);
@@ -162,53 +162,18 @@ public class KBTableOperations extends KDBTable {
     
     return (executeStatementGetAll (statement.toString()));
   }
-  
-  /**
-   * Make a copy of the entire table. ONLY use this for small tables. We need this however
-   * so that we can support tables being send across the network. In most cases this should
-   * not be an issue because copy will most likely be called on tables that represent
-   * snippets of data.
-   * 
-   * @return
-   */
-  public KDBTable copy () {
-    M_log.info("copy ()");
     
-  	KDBTable newTable=new KDBTable (this.driver);
-	  
-	  ArrayList<KBClass> fromEntries=this.getEntries();
-  	
-	  for (int i=0;i<fromEntries.size();i++) {
-	    KBClass test=fromEntries.get(i);
-      KBClass copy=test.copy();
-      newTable.entries.add(copy);
-	  }
-  			
-  	return (newTable);
-  }
-  
   /**
    * Make a copy of the entire table. ONLY use this for small tables. We need this however
    * so that we can support tables being send across the network. In most cases this should
    * not be an issue because copy will most likely be called on tables that represent
-   * snippets of data.
+   * snippets of data. Also note that this does not copy the table name, since that would
+   * create a clash in the database.
    * 
    * @return
    */
   public KDBTable copy (KDBTable aSource) {
     M_log.info("copy (KDBTable)");
-    
-  	KDBTable newTable=new KDBTable (this.driver);
-  	
-	  ArrayList<KBClass> fromEntries=aSource.getEntries();
-	  
-	  M_log.info("Copying " + fromEntries.size() + " entries ...");
-  	
-	  for (int i=0;i<fromEntries.size();i++) {
-	    KBClass test=fromEntries.get(i);
-	    newTable.entries.add(test.copy());
-	  }
-  			
-  	return (newTable);
+  	return (aSource.copy());
   }  
 }

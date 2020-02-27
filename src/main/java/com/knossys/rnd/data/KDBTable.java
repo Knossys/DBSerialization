@@ -14,6 +14,7 @@ import javax.json.JsonObjectBuilder;
 
 import com.knossys.rnd.data.db.DbDriverInterface;
 import com.knossys.rnd.data.primitives.KBClass;
+import com.knossys.rnd.tools.StringTools;
 
 /**
  * @author vvelsen
@@ -22,10 +23,11 @@ public class KDBTable {
 	
 	private static Logger M_log = Logger.getLogger(KDBTable.class.getName());
 	
-	protected String tableName="unassigned";
+	protected String tableName=StringTools.generateString(10);
 	protected ArrayList<KBClass> entries=new ArrayList<KBClass> ();
-	
+	private ArrayList<ArrayList<KBClass>> cache=null;
 	protected DbDriverInterface driver=null;
+	private Boolean schemaSet=false;
 	
 	/**
 	 * 
@@ -33,6 +35,14 @@ public class KDBTable {
 	public KDBTable (DbDriverInterface aDriver) {
 		driver=aDriver;
 	}
+	
+	/**
+	 * 
+	 */
+	public KDBTable (DbDriverInterface aDriver, String aTableName) {
+		driver=aDriver;
+		tableName=aTableName;
+	}	
 	
 	/**
 	 * @return
@@ -55,14 +65,14 @@ public class KDBTable {
 	 * 
 	 * @param anEntry
 	 */
-	public void addEntry (KBClass anEntry) {
+	public void addColumn (KBClass anEntry) {
 		entries.add(anEntry);
 	}
 	
 	/**
 	 * @return
 	 */
-	public ArrayList<KBClass> getEntries () {
+	public ArrayList<KBClass> getColumns () {
 	  return entries;
 	}
 	
@@ -275,12 +285,16 @@ public class KDBTable {
 	/**
 	 * @throws Exception
 	 */
-	public void prepTables() throws Exception {
+	public Boolean prepTables() throws Exception {
 		M_log.info("prepTables ()");
 		
 		if (driver==null) {
-			return;
-		}		
+			return (false);
+		}
+		
+		if (schemaSet==true) {
+			return (true);
+		}
 	
 		ResultSet resultSet = null;
 		Statement statement = null;
@@ -290,7 +304,7 @@ public class KDBTable {
 		statement = driver.createStatement();
 
 		if (statement == null) {
-			return;
+			return (false);
 		}
 		
 		statementString = generateSchema ();
@@ -301,9 +315,18 @@ public class KDBTable {
 			result = statement.executeUpdate(statementString);
 		} catch (Exception e) {
 			M_log.info("result: " + e.getMessage());
+			return (false);
 		} finally {
 			driver.closeStatement(statement, resultSet);
 		}
+
+		if (result==0) {
+			return (false);
+		}
+
+		schemaSet=true;
+		
+		return (true);
 	}	
 	
 	/**
@@ -326,12 +349,23 @@ public class KDBTable {
 	/**
 	 * 
 	 */
-	public void modify() {		
-		M_log.info("modify ()");
+	public Boolean persist() {		
+		M_log.info("persist ()");
 		
 		if (driver==null) {
-			return;
+			//throw new KDataException("No database driver registered");
+			return (false);
 		}		
+		
+		if (schemaSet==false) {
+			M_log.info("Schema not saved to db yet, doing so now ...");	
+			try {
+				this.prepTables();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return (false);
+			}
+		}
 		
 		ResultSet resultSet = null;
 		Statement statement = null;
@@ -341,14 +375,14 @@ public class KDBTable {
 		KBClass primaryKey=getPrimaryKey ();
 		
 		if (primaryKey==null) {
-			return;
+			return (false);
 		}
 		
 		if (entryExists (primaryKey.getName(),primaryKey.getValue().toString())==true) {	
 			statement = driver.createStatement();
 	
 			if (statement == null) {
-				return;
+				return (false);
 			}
 			
 			statementString = generateUpdateStatement ();
@@ -366,7 +400,7 @@ public class KDBTable {
 			statement = driver.createStatement();
 	
 			if (statement == null) {
-				return;
+				return (false);
 			}
 			
 			statementString = generateCreateStatement ();
@@ -377,10 +411,17 @@ public class KDBTable {
 				result = statement.executeUpdate(statementString);
 			} catch (Exception e) {
 				M_log.info("result: " + e.getMessage());
+				return (false);
 			} finally {
 				driver.closeStatement(statement, resultSet);
 			}				
 		}
+		
+		if (result==0) {
+			return (false);
+		}
+		
+		return (true);
 	}
 	
 	/**
@@ -504,7 +545,24 @@ public class KDBTable {
 		M_log.info("Query: " + statementString);
 		
     return (executeStatementGetAll (statementString));
-	}		
+	}	
+	
+  /**
+   * @param allData
+   */
+	public void setAllData(ArrayList<ArrayList<KBClass>> allData) {
+    cache=allData;
+	}			
+	
+	/**
+	 * 
+	 */
+	public ArrayList<ArrayList<KBClass>> getAllData () {
+		if (cache==null) {
+		  cache=getAll();
+		}
+		return (cache);
+	}
 	
 	/**
 	 * 
@@ -651,6 +709,38 @@ public class KDBTable {
 	/**
 	 * 
 	 */
+	public void toCSV (String aFile, KDBTable aTable) {
+  	M_log.info("toCSV ("+aFile+")");
+  	toSpreadSheet (aFile,"\t",aTable);
+	}
+	
+	/**
+	 * 
+	 */
+	public void toTSV (String aFile, KDBTable aTable) {
+  	M_log.info("toTSV ("+aFile+")");
+  	toSpreadSheet (aFile,"\t",aTable);
+	}		
+	
+	/**
+	 * 
+	 */
+	public void toCSV (String aFile) {
+  	M_log.info("toCSV ("+aFile+")");
+  	toSpreadSheet (aFile,"\t");
+	}
+	
+	/**
+	 * 
+	 */
+	public void toTSV (String aFile) {
+  	M_log.info("toTSV ("+aFile+")");
+  	toSpreadSheet (aFile,"\t");
+	}		
+	
+	/**
+	 * 
+	 */
 	public void toSpreadSheet (String aFile, String aSeparator, ArrayList<ArrayList<KBClass>> values) {
   	M_log.info("toSpreadSheet ("+aFile+")");
 
@@ -662,41 +752,7 @@ public class KDBTable {
 			e.printStackTrace();
 			return;
 		}
-		
-	  int selectedCount=this.getSelectedCount();
-		int index=0;
-		
-		try {
-			for (int i=0;i<entries.size();i++) {
-				KBClass entry=entries.get(i);
-				
-				if (entry.isSelected()==true) {
-					if (index!=0) {
-						writer.write (aSeparator);
-					}
-					
-					writer.write(entry.getName());
-					
-					index++;
-					
-					if (index>(selectedCount-1)) {
-						writer.write("\n");
-						index=0;
-					}
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			try {
-				writer.close();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			return;			
-		}
-				
+								
 		try {
 			for (int i=0;i<values.size();i++) {
 				ArrayList<KBClass> row=values.get(i);
@@ -726,5 +782,208 @@ public class KDBTable {
 			e.printStackTrace();
 			return;
 		}
+	}
+	
+	/**
+	 * 
+	 */
+	public void toSpreadSheet (String aFile, String aSeparator,  KDBTable aTable) {
+  	M_log.info("toSpreadSheet ("+aFile+")");
+
+    FileWriter writer=null;
+    
+		try {
+			writer = new FileWriter(aFile, true);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		int index=0;
+		
+		try {
+			for (int i=0;i<aTable.getColumns().size();i++) {
+				KBClass entry=aTable.getColumns().get(i);
+				
+				if (entry.isSelected()==true) {
+					if (index>0) {
+						writer.write (aSeparator);
+					}
+					
+					writer.write(entry.getName());
+					
+					index++;
+				}
+			}
+			
+			writer.write("\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			try {
+				writer.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return;			
+		}
+		
+		ArrayList<ArrayList<KBClass>> values=aTable.getAllData();
+				
+		index=0;
+		
+		try {
+			for (int i=0;i<values.size();i++) {
+				ArrayList<KBClass> row=values.get(i);
+				
+				index=0;
+				for (int j=0;j<row.size();j++) {
+					KBClass column=aTable.getColumns().get(j);
+					KBClass entry=row.get(j);
+									  
+				  if (column.isSelected()==true) {
+					  if (index>0) {
+						  writer.write (aSeparator);
+					  }
+					  
+			  	  writer.write(entry.getValue().toString());
+			  	  index++;
+				  }
+				}
+				
+				writer.write("\n");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;			
+		}
+		
+    try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+	}	
+	
+	/**
+	 * 
+	 */
+	public void toSpreadSheet (String aFile, String aSeparator) {
+  	M_log.info("toSpreadSheet ("+aFile+")");
+
+    FileWriter writer=null;
+    
+		try {
+			writer = new FileWriter(aFile, true);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+	  //int selectedCount=this.getSelectedCount();
+		int index=0;
+		
+		try {
+			for (int i=0;i<this.getColumns().size();i++) {
+				KBClass entry=this.getColumns().get(i);
+				
+				if (entry.isSelected()==true) {
+					if (index!=0) {
+						writer.write (aSeparator);
+					}
+					
+					writer.write(entry.getName());
+					
+					index++;
+				}
+			}
+			
+			writer.write("\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			try {
+				writer.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return;			
+		}
+		
+		ArrayList<ArrayList<KBClass>> values=this.getAllData();
+				
+		index=0;
+		
+		try {
+			for (int i=0;i<values.size();i++) {
+				ArrayList<KBClass> row=values.get(i);
+				
+				index=0;
+				for (int j=0;j<row.size();j++) {
+					KBClass column=getColumns().get(j);
+					KBClass entry=row.get(j);
+					
+					if (column.isSelected()==true) {
+					  if (index>0) {
+						  writer.write (aSeparator);
+					  }
+					
+				  	writer.write(entry.getValue().toString());
+				  	
+				  	index++;
+					}
+				}
+				
+				writer.write("\n");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;			
+		}
+		
+    try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
 	}		
+	
+  /**
+   * Make a copy of the entire table. ONLY use this for small tables. We need this however
+   * so that we can support tables being send across the network. In most cases this should
+   * not be an issue because copy will most likely be called on tables that represent
+   * snippets of data. Also note that this does not copy the table name, since that would
+   * create a clash in the database.
+   * 
+   * @return
+   */
+  public KDBTable copy () {
+    M_log.info("copy ()");
+    
+  	KDBTable newTable=new KDBTable (this.driver);
+	  
+	  ArrayList<KBClass> fromEntries=this.getColumns();
+	  
+	  M_log.info("Copying: " + fromEntries.size () + " colums");
+  	
+	  for (int i=0;i<fromEntries.size();i++) {
+	    KBClass test=fromEntries.get(i);
+      KBClass copy=test.copy();
+      newTable.addColumn(copy);
+	  }
+	  
+	  newTable.setAllData (getAllData ());
+	  
+	  M_log.info("Nr columns in new table: " + newTable.getColumns().size () + " colums");
+  			
+  	return (newTable);
+  }	
 }

@@ -27,9 +27,9 @@ public class KBDBTestClassRandomSmallA extends KDBTable {
 		setTableName ("smalltablea");
 		
 		longEntry.setPrimaryKey(true);
-    addEntry (longEntry);
-    addEntry (booleanEntry);
-    addEntry (integerEntry);
+    addColumn (longEntry);
+    addColumn (booleanEntry);
+    addColumn (integerEntry);
 	}
 	
 	/**
@@ -42,7 +42,7 @@ public class KBDBTestClassRandomSmallA extends KDBTable {
     booleanEntry.setValue(r.nextBoolean());
     integerEntry.setValue(r.nextInt());
 				
-		modify ();
+		persist ();
 	}
 	
 	/**
@@ -55,6 +55,6 @@ public class KBDBTestClassRandomSmallA extends KDBTable {
     booleanEntry.setValue(r.nextBoolean());
     integerEntry.setValue(r.nextInt());
 				
-		modify ();
+		persist ();
 	}	
 }

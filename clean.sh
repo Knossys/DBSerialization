@@ -1,6 +1,6 @@
 #!/bin/bash
 clear
-rm -rfv ./target
-rm -rfv ./test.log
-rm -rfv ./db/*.db
-rm -rfv ./db/*.tsv
+rm -rf ./target
+rm -rf ./test.log
+rm -rf ./db/*.db
+rm -rf ./db/*.tsv
