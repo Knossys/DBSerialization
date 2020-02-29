@@ -28,6 +28,13 @@ public class KDBTable {
 	private ArrayList<ArrayList<KBClass>> cache=null;
 	protected DbDriverInterface driver=null;
 	private Boolean schemaSet=false;
+
+	/**
+	 * 
+	 */
+	public KDBTable () {
+
+	}	
 	
 	/**
 	 * 

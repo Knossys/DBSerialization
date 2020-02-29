@@ -22,6 +22,12 @@ public class KBTableOperations extends KDBTable {
 	/**
 	 * @param aDriver
 	 */
+	public KBTableOperations() {	
+	}  
+  
+	/**
+	 * @param aDriver
+	 */
 	public KBTableOperations(DbDriverInterface aDriver) {
 		super(aDriver);
 	}
