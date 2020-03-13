@@ -1,5 +1,8 @@
 .DS_Store
 
+# SQLite files
+*.db
+
 # Compiled class file
 *.class
 
