@@ -30,6 +30,13 @@ public class KDataset extends KBTableOperations {
   // the dataset of perhaps indicate it's the last one produced,
   // etc
   private String command=COMMAND_IDLE;
+
+  /**
+   * 
+   */
+  public KDataset () {
+  	setId(StringTools.generateStringUUID ());	
+  }  
   
   /**
    * 
